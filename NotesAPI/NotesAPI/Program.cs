@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NotesAPI.Data;
+using NotesAPI.Development;
 using NotesAPI.Endpoints;
 using NotesAPI.Services;
 using System.Text;
@@ -95,6 +96,7 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
+
 // --------------------------------------------------
 // Swagger
 // --------------------------------------------------
@@ -136,7 +138,7 @@ var app = builder.Build();
 
 
 // --------------------------------------------------
-// Development Admin
+// Development Test Users
 // --------------------------------------------------
 
 if (app.Environment.IsDevelopment())
@@ -146,23 +148,15 @@ if (app.Environment.IsDevelopment())
     var db = scope.ServiceProvider
         .GetRequiredService<NotesDbContext>();
 
-    var mainAdminUsername =
-        builder.Configuration[
-            "DevelopmentAdminUsername"];
+    var passwordService = scope.ServiceProvider
+        .GetRequiredService<PasswordService>();
 
-    if (!string.IsNullOrWhiteSpace(mainAdminUsername))
-    {
-        var user = await db.Users
-            .FirstOrDefaultAsync(user =>
-                user.Username == mainAdminUsername);
+    // Apply pending migrations before creating development test data.
+    await db.Database.MigrateAsync();
 
-        if (user != null && user.Role != "MainAdmin")
-        {
-            user.Role = "MainAdmin";
-
-            await db.SaveChangesAsync();
-        }
-    }
+    await TestUsers.SeedAsync(
+        db,
+        passwordService);
 }
 
 
@@ -185,6 +179,7 @@ app.MapNotesEndpoints();
 app.MapCategoriesEndpoints();
 app.MapAuthEndpoints();
 app.MapAdminEndpoints();
+
 
 // --------------------------------------------------
 // Run
