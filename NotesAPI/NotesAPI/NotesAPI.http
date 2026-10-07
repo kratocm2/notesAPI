@@ -1,0 +1,40 @@
+@NotesAPI_HostAddress = http://localhost:5140
+
+### Get all notes
+GET {{NotesAPI_HostAddress}}/notes/
+Accept: application/json
+###
+
+### Create a note
+POST {{NotesAPI_HostAddress}}/notes/
+Content-Type: application/json
+
+{
+    "title": "My first note",
+    "content": "This is my first API note."
+}
+###
+
+### Get note of ID 1
+GET {{NotesAPI_HostAddress}}/notes/1
+Accept: application/json
+###
+
+### Get note of ID 999
+GET {{NotesAPI_HostAddress}}/notes/999
+Accept: application/json
+###
+
+### Delete a note
+DELETE {{NotesAPI_HostAddress}}/notes/1
+###
+
+### Update a note
+PUT {{NotesAPI_HostAddress}}/notes/2
+Content-Type: application/json
+
+{
+    "title": "Updated note",
+    "content": "This note has been updated."
+}
+###
